@@ -5,10 +5,10 @@ import { Form, Field } from 'react-final-form'
 import { IRootStore } from '../../features/store';
 import { setGameState, setStartOptions } from '../../features/main/slicer';
 import { GameStatus } from '../../features/main/types';
+import { IFieldSize } from '../../features/field/types';
 
 interface IFormInterface {
-  fieldSizeX: number,
-  fieldSizeY: number,
+  size: IFieldSize,
   minesCount: number,
 }
 
@@ -17,7 +17,7 @@ const StartForm = () => {
   const dispatch = useDispatch();
 
   const onSubmit = (values: IFormInterface) => {
-    dispatch(setStartOptions(values.fieldSizeX, values.fieldSizeY, values.minesCount));
+    dispatch(setStartOptions(values.minesCount, {x: values.size.x, y: values.size.y}));
     dispatch(setGameState(GameStatus.GAME_BEFORE_START));
   }
 
@@ -32,7 +32,7 @@ const StartForm = () => {
               <div className="p-2 flex-fill justify-content-center">
                 <label>
                   <Field 
-                    name="fieldSizeX"
+                    name="size.x"
                     className="number-input"
                     component="input"
                     type="number"
@@ -43,7 +43,7 @@ const StartForm = () => {
               <div className="p-2 flex-fill justify-content-center">
                 <label>
                   <Field 
-                    name="fieldSizeY"
+                    name="size.y"
                     className="number-input"
                     component="input"
                     type="number"

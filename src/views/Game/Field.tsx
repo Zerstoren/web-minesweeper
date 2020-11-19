@@ -9,7 +9,7 @@ const Field = () => {
   const dispath = useDispatch();
 
   const [currentPress, setCurrentPress] = useState('');
-  const {fieldSizeX, fieldSizeY, gameStatus, minesCount} = useSelector((state: IRootStore) => state.main);
+  const {size, gameStatus, minesCount} = useSelector((state: IRootStore) => state.main);
 
   const onMouseDown = (e: React.MouseEvent<HTMLDivElement & { target: HTMLDivElement }>) => {
     const target = e.target as HTMLDivElement;
@@ -34,16 +34,15 @@ const Field = () => {
 
   if (gameStatus === GameStatus.GAME_BEFORE_START) {
     dispath(generateMap(
-      fieldSizeX,
-      fieldSizeY,
-      minesCount
+      minesCount,
+      size
     ));
   }
 
   let axisY = [];
-  for (let y = 0; y < fieldSizeY; y++) {
+  for (let y = 0; y < size.y; y++) {
     let axisX = [];
-    for (let x = 0; x < fieldSizeX; x++) {
+    for (let x = 0; x < size.x; x++) {
       let isClassWhenMouseDownOnCurrentBox = `${x}_${y}` === currentPress ? 'pressed' : '';
 
       axisX.push(

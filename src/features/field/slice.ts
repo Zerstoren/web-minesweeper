@@ -8,21 +8,21 @@ import {
   IFieldCeil,
   IFieldElement, 
   IFieldList, 
-  IFieldStore 
+  IFieldStore, 
+  IFieldSize
 } from './types';
 
 import { generateFieldMap } from './action';
 
 interface IGenerateMapPayload {
-  sizeX: number,
-  sizeY: number,
+  size: IFieldSize,
   minesCount: number
 }
 
 const getCeilString = (ceil: IFieldElement) => `${ceil.y}_${ceil.x}`;
 
-const fieldAdapter = createEntityAdapter<IFieldElement>({
-  selectId: (ceil: IFieldElement) => getCeilString(ceil)
+const fieldAdapter = createEntityAdapter<IFieldCeil>({
+  selectId: (ceil: IFieldCeil) => getCeilString(ceil)
 });
 
 const initialState: IFieldStore = fieldAdapter.getInitialState({
@@ -35,13 +35,12 @@ const fieldSlice = createSlice({
   reducers: {
     generateMap: {
       reducer(state, action: PayloadAction<IGenerateMapPayload>) {
-        const {minesCount, sizeX, sizeY} = action.payload;
-        generateFieldMap(sizeX, sizeY, minesCount);
+        const {minesCount, size} = action.payload;
+        fieldAdapter.setAll(state, generateFieldMap(minesCount, size));
       },
-      prepare: (sizeX: number, sizeY: number, minesCount: number) => ({
+      prepare: (minesCount: number, size: IFieldSize) => ({
         payload: {
-          sizeX: sizeX,
-          sizeY: sizeY,
+          size: size,
           minesCount: minesCount
         }
       })

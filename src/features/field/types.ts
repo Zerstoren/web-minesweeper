@@ -5,6 +5,7 @@ export type {
   IFieldList,
   IFieldElement,
   IFieldCeil,
+  IFieldSize,
 }
 
 interface IFieldStore {
@@ -24,4 +25,9 @@ interface IFieldElement {
 interface IFieldCeil extends IFieldElement {
   isMine: boolean,
   numberMinesArround?: number
+}
+
+interface IFieldSize {
+  x: number,
+  y: number
 }

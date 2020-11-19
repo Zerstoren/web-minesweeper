@@ -8,16 +8,16 @@ import {
   GameStatus,
 } from './types';
 
+import { IFieldSize } from '../field/types';
+
 interface ISetFieldPayload {
-  sizeX: number, 
-  sizeY: number, 
+  size: IFieldSize,
   minesCount: number
 }
 
 const initialState: IMainStore = {
-  fieldSizeX: 10,
-  fieldSizeY: 10,
   minesCount: 10,
+  size: {x: 10, y: 10},
   gameStatus: GameStatus.MAIN_SCREEN
 };
 
@@ -27,15 +27,14 @@ const mainSlicer = createSlice({
   reducers: {
     setStartOptions: {
       reducer(state, action: PayloadAction<ISetFieldPayload>) {
-        const {minesCount, sizeX, sizeY} = action.payload;
-        state.fieldSizeX = sizeX;
-        state.fieldSizeY = sizeY;
+        const {minesCount, size} = action.payload;
+        state.size.x = size.x;
+        state.size.y = size.y;
         state.minesCount = minesCount;
       },
-      prepare: (sizeX: number, sizeY: number, minesCount: number) => ({
+      prepare: (minesCount: number, size: IFieldSize) => ({
         payload: {
-          sizeX: sizeX,
-          sizeY: sizeY,
+          size: size,
           minesCount: minesCount
         }
       })

@@ -1,3 +1,5 @@
+import { IFieldSize } from "../field/types"
+
 export type {
   IMainStore
 }
@@ -7,8 +9,7 @@ export {
 }
 
 interface IMainStore {
-  fieldSizeX: number,
-  fieldSizeY: number,
+  size: IFieldSize,
   minesCount: number,
   gameStatus: GameStatus
 }
