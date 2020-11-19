@@ -18,7 +18,7 @@ const StartForm = () => {
 
   const onSubmit = (values: IFormInterface) => {
     dispatch(setStartOptions(values.minesCount, {x: values.size.x, y: values.size.y}));
-    dispatch(setGameState(GameStatus.GAME_BEFORE_START));
+    dispatch(setGameState(GameStatus.GAME_GENERATE_MAP));
   }
 
   return (

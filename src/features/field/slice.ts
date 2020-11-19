@@ -48,7 +48,19 @@ const fieldSlice = createSlice({
 
     openElement: {
       reducer(state, action: PayloadAction<IFieldElement>) {
-        
+        state.entities[getCeilString(action.payload)].isOpen = true;
+      },
+      prepare: (ceil: IFieldElement) => ({
+        payload: {
+          x: ceil.x,
+          y: ceil.y
+        }
+      })
+    },
+
+    flagElement: {
+      reducer(state, action: PayloadAction<IFieldElement>) {
+        state.entities[getCeilString(action.payload)].isFlagged = !state.entities[getCeilString(action.payload)].isFlagged;
       },
       prepare: (ceil: IFieldElement) => ({
         payload: {
@@ -62,6 +74,10 @@ const fieldSlice = createSlice({
 
 export const {
   generateMap,
-  openElement
+  openElement,
+  flagElement,
 } = fieldSlice.actions;
+export {
+  getCeilString
+}
 export default fieldSlice.reducer;

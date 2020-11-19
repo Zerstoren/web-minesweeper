@@ -24,7 +24,9 @@ interface IFieldElement {
 
 interface IFieldCeil extends IFieldElement {
   isMine: boolean,
-  numberMinesArround?: number
+  isOpen: boolean,
+  isFlagged: boolean,
+  numberMinesArround: number
 }
 
 interface IFieldSize {

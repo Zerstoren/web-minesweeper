@@ -16,6 +16,7 @@ interface IMainStore {
 
 enum GameStatus {
   MAIN_SCREEN,
+  GAME_GENERATE_MAP,
   GAME_BEFORE_START,
   GAME_IN_PROCESS,
   WIN_SCREEN,
