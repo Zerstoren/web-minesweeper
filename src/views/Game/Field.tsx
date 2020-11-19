@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { IRootStore } from '../../features/store';
-import { openElement, generateMap, getCeilString, flagElement} from '../../features/field/slice';
+import { openElement, flagElement} from '../../features/field/slice';
+import { getCeilString } from '../../features/field/action';
+import { GameStatus } from '../../features/main/types';
 
 
 const Field = () => {
@@ -13,6 +15,10 @@ const Field = () => {
   const field = useSelector((state: IRootStore) => state.field);
 
   const onMouseDown = (e: React.MouseEvent<HTMLDivElement & { target: HTMLDivElement }>) => {
+    if (gameStatus !== GameStatus.GAME_IN_PROCESS && gameStatus !== GameStatus.GAME_BEFORE_START) {
+      return;
+    }
+
     const target = e.target as HTMLDivElement;
     const ceilId = getCeilString({
       x: Number.parseInt(target.dataset.x as string), 
@@ -21,7 +27,7 @@ const Field = () => {
 
     const ceil = field.entities[ceilId];
 
-    if (!ceil.isFlagged && e.button === 0 || e.button === 2) {
+    if ((!ceil.isFlagged && e.button === 0) || e.button === 2) {
       setCurrentPress(ceilId);
     }
   }
@@ -31,6 +37,10 @@ const Field = () => {
   }
 
   const onMouseUp = (e: React.MouseEvent<HTMLDivElement & { target: HTMLDivElement }>) => {
+    if (gameStatus !== GameStatus.GAME_IN_PROCESS && gameStatus !== GameStatus.GAME_BEFORE_START) {
+      return;
+    }
+
     const target = e.target as HTMLDivElement;
     const ceilId = getCeilString({
       x: Number.parseInt(target.dataset.x as string), 
@@ -42,7 +52,7 @@ const Field = () => {
       dispath(openElement({
         x: Number.parseInt(target.dataset.x as string),
         y: Number.parseInt(target.dataset.y as string)
-      }));
+      }, size));
     } else if (ceilId === currentPress && e.button === 2 && !ceil.isOpen) {
       dispath(flagElement({
         x: Number.parseInt(target.dataset.x as string),
@@ -101,7 +111,7 @@ const Field = () => {
     <div className="field" draggable="false" onContextMenu={(e) => {e.preventDefault(); return false;}}>
       {axisY}
     </div>
-  )
+  );
 }
 
 export default Field;

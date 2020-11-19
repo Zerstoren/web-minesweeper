@@ -12,14 +12,26 @@ import {
   IFieldSize
 } from './types';
 
-import { generateFieldMap } from './action';
+import { 
+  generateFieldMap, 
+  searchElementForOpen,
+  getCeilString,
+  noMinesLeft
+} from './action';
+
+import store from '../store';
+import { setGameState } from '../main/slicer';
+import { GameStatus } from '../main/types';
 
 interface IGenerateMapPayload {
   size: IFieldSize,
   minesCount: number
 }
 
-const getCeilString = (ceil: IFieldElement) => `${ceil.y}_${ceil.x}`;
+interface IOpenElementPayload {
+  element: IFieldElement,
+  size: IFieldSize,
+}
 
 const fieldAdapter = createEntityAdapter<IFieldCeil>({
   selectId: (ceil: IFieldCeil) => getCeilString(ceil)
@@ -47,13 +59,43 @@ const fieldSlice = createSlice({
     },
 
     openElement: {
-      reducer(state, action: PayloadAction<IFieldElement>) {
-        state.entities[getCeilString(action.payload)].isOpen = true;
+      reducer(state, action: PayloadAction<IOpenElementPayload>) {
+        const {element, size} = action.payload;
+        
+        const ceil = state.entities[getCeilString(element)];
+
+        ceil.isOpen = true;
+
+        if (ceil.isMine) {
+          //TODO костыль, переделать
+          setTimeout(() => {
+            store.dispatch(setGameState(GameStatus.LOOSE_SCREEN));
+          });
+        }
+
+        if (ceil.numberMinesArround === 0) {
+          searchElementForOpen(element, size, state.entities)
+            .map((element) => {
+              state.entities[getCeilString(element)].isOpen = true;
+            });
+        }
+
+        if (noMinesLeft()) {
+          //TODO костыль, переделать
+          setTimeout(() => {
+            store.dispatch(setGameState(GameStatus.WIN_SCREEN));
+          });
+        }
+
+
       },
-      prepare: (ceil: IFieldElement) => ({
+      prepare: (element: IFieldElement, size: IFieldSize) => ({
         payload: {
-          x: ceil.x,
-          y: ceil.y
+          element: {
+            x: element.x,
+            y: element.y
+          },
+          size: size
         }
       })
     },
@@ -77,7 +119,4 @@ export const {
   openElement,
   flagElement,
 } = fieldSlice.actions;
-export {
-  getCeilString
-}
 export default fieldSlice.reducer;
