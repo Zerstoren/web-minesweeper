@@ -17,14 +17,14 @@ const Field = () => {
   const field = useSelector((state: IRootStore) => state.field);
 
   useEffect(() => {
-    if (gameStart) {
+    if (gameStatus === GameStatus.GAME_GENERATE_MAP && gameStart === true) {
+      setGameStart(false);
+    }
+
+    if (gameStatus === GameStatus.GAME_BEFORE_START && gameStart) {
       dispath(setGameState(GameStatus.GAME_IN_PROCESS));
     }
   })
-
-  if (gameStatus === GameStatus.GAME_BEFORE_START && gameStart === true) {
-    setGameStart(false);
-  }
 
   const onMouseDown = (e: React.MouseEvent<HTMLDivElement & { target: HTMLDivElement }>) => {
     if (gameStatus !== GameStatus.GAME_IN_PROCESS && gameStatus !== GameStatus.GAME_BEFORE_START) {
@@ -104,7 +104,7 @@ const Field = () => {
       axisX.push(
         <div 
           className={`column ${isClassWhenMouseDownOnCurrentBox}`} 
-          key={x + '_' + y}
+          key={getCeilString({x, y})}
           data-x={x} 
           data-y={y}
           draggable="false"

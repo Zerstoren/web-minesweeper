@@ -13,16 +13,11 @@ import {
 } from './types';
 
 import { 
-  generateFieldMap, 
+  generateMap, 
   searchElementForOpen,
   getCeilString,
   isAllMinesFound
 } from './action';
-
-interface IGenerateMapPayload {
-  size: IFieldSize,
-  minesCount: number
-}
 
 interface IOpenElementPayload {
   element: IFieldElement,
@@ -35,8 +30,6 @@ const fieldAdapter = createEntityAdapter<IFieldCeil>({
 
 const initialState: IFieldStore = fieldAdapter.getInitialState({
   entities: <IFieldList>{},
-  minesLeft: 0,
-  timer: 0,
   allMinesFound: false,
   isMineOpen: false,
 });
@@ -45,19 +38,6 @@ const fieldSlice = createSlice({
   name: 'field',
   initialState: initialState,
   reducers: {
-    generateMap: {
-      reducer(state, action: PayloadAction<IGenerateMapPayload>) {
-        const {minesCount, size} = action.payload;
-        fieldAdapter.setAll(state, generateFieldMap(minesCount, size));
-      },
-      prepare: (minesCount: number, size: IFieldSize) => ({
-        payload: {
-          size: size,
-          minesCount: minesCount
-        }
-      })
-    },
-
     openElement: {
       reducer(state, action: PayloadAction<IOpenElementPayload>) {
         const {element, size} = action.payload;
@@ -102,10 +82,17 @@ const fieldSlice = createSlice({
       })
     }
   },
+  extraReducers: (builder) => {
+    builder
+      .addCase(generateMap.fulfilled, (state, action) => {
+        state.isMineOpen = false;
+        state.allMinesFound = false;
+        fieldAdapter.setAll(state, action.payload);
+      })
+  }
 });
 
 export const {
-  generateMap,
   openElement,
   flagElement,
 } = fieldSlice.actions;

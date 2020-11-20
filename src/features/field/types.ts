@@ -11,7 +11,6 @@ export type {
 interface IFieldStore {
   ids: Array<EntityId>
   entities: IFieldList,
-  timer: number,
   allMinesFound: boolean,
   isMineOpen: boolean
 }

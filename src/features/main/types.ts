@@ -15,10 +15,10 @@ interface IMainStore {
 }
 
 enum GameStatus {
-  MAIN_SCREEN,
-  GAME_GENERATE_MAP,
-  GAME_BEFORE_START,
-  GAME_IN_PROCESS,
-  WIN_SCREEN,
-  LOOSE_SCREEN
+  MAIN_SCREEN = 'main_screen',
+  GAME_GENERATE_MAP = 'generate_map',
+  GAME_BEFORE_START = 'before_start',
+  GAME_IN_PROCESS = 'in_process',
+  WIN_SCREEN = 'win',
+  LOOSE_SCREEN = 'loose'
 }

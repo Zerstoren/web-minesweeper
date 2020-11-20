@@ -1,6 +1,5 @@
 import {IFieldElement, IFieldCeil, IFieldSize, IFieldList, IFieldStore} from './types';
-import { isCompositeComponent } from 'react-dom/test-utils';
-import { getHashes } from 'crypto';
+import { createAsyncThunk } from '@reduxjs/toolkit';
 
 const positionsArround: Array<[number, number]> = [
   // [y, x]
@@ -181,8 +180,13 @@ const _searchElementForOpen = (
   return foundElementList;
 }
 
+
+const generateMap = createAsyncThunk('field/generateMap', async (data: {minesCount: number, size: IFieldSize}) => {
+  return generateFieldMap(data.minesCount, data.size);
+});
+
 export {
-  generateFieldMap,
+  generateMap,
   getCeilString,
   searchElementForOpen,
   isAllMinesFound
