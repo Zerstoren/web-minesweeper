@@ -1,18 +1,30 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { IRootStore } from '../../features/store';
 import { openElement, flagElement} from '../../features/field/slice';
 import { getCeilString } from '../../features/field/action';
 import { GameStatus } from '../../features/main/types';
+import { setGameState } from '../../features/main/slicer';
 
 
 const Field = () => {
   const dispath = useDispatch();
 
   const [currentPress, setCurrentPress] = useState('');
+  const [gameStart, setGameStart] = useState(false);
   const {size, gameStatus, minesCount} = useSelector((state: IRootStore) => state.main);
   const field = useSelector((state: IRootStore) => state.field);
+
+  useEffect(() => {
+    if (gameStart) {
+      dispath(setGameState(GameStatus.GAME_IN_PROCESS));
+    }
+  })
+
+  if (gameStatus === GameStatus.GAME_BEFORE_START && gameStart === true) {
+    setGameStart(false);
+  }
 
   const onMouseDown = (e: React.MouseEvent<HTMLDivElement & { target: HTMLDivElement }>) => {
     if (gameStatus !== GameStatus.GAME_IN_PROCESS && gameStatus !== GameStatus.GAME_BEFORE_START) {
@@ -46,14 +58,21 @@ const Field = () => {
       x: Number.parseInt(target.dataset.x as string), 
       y: Number.parseInt(target.dataset.y as string)
     });
+
+    if (ceilId !== currentPress) {
+      return;
+    }
+
     const ceil = field.entities[ceilId];
 
-    if (ceilId === currentPress && e.button === 0) {
+    if (e.button === 0) {
+      setGameStart(true);
       dispath(openElement({
         x: Number.parseInt(target.dataset.x as string),
         y: Number.parseInt(target.dataset.y as string)
       }, size));
-    } else if (ceilId === currentPress && e.button === 2 && !ceil.isOpen) {
+    } else if (e.button === 2 && !ceil.isOpen) {
+      setGameStart(true);
       dispath(flagElement({
         x: Number.parseInt(target.dataset.x as string),
         y: Number.parseInt(target.dataset.y as string)

@@ -16,7 +16,7 @@ interface ISetFieldPayload {
 }
 
 const initialState: IMainStore = {
-  minesCount: 1,
+  minesCount: 10,
   size: {x: 30, y: 30},
   gameStatus: GameStatus.MAIN_SCREEN
 };
@@ -39,7 +39,6 @@ const mainSlicer = createSlice({
         }
       })
     },
-      
     setGameState: (state, action: PayloadAction<GameStatus>) => {
       state.gameStatus = action.payload;
     }

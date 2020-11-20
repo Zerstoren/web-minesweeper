@@ -1,4 +1,4 @@
-import {IFieldElement, IFieldCeil, IFieldSize, IFieldList} from './types';
+import {IFieldElement, IFieldCeil, IFieldSize, IFieldList, IFieldStore} from './types';
 import { isCompositeComponent } from 'react-dom/test-utils';
 import { getHashes } from 'crypto';
 
@@ -96,9 +96,15 @@ const generateFieldMap = (minesCount: number, size: IFieldSize) : Array<IFieldCe
   return mapCeilList;
 }
 
-const noMinesLeft = () : boolean => {
+const isAllMinesFound = (store: IFieldStore) : boolean => {
+  let closedItems = 0;
+  let mines = 0;
+  Object.values(store.entities).forEach((ceil: IFieldCeil) => {
+    if (!ceil.isOpen) closedItems += 1;
+    if (ceil.isMine) mines += 1;
+  });
 
-  return true;
+  return mines === closedItems;
 };
 
 const searchElementForOpen = (
@@ -179,5 +185,5 @@ export {
   generateFieldMap,
   getCeilString,
   searchElementForOpen,
-  noMinesLeft
+  isAllMinesFound
 }

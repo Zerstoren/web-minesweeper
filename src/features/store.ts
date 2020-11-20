@@ -15,7 +15,7 @@ const store = configureStore({
   reducer: {
     main: mainReducer,
     field: fieldReducer,
-  }
+  },
 });
 
 export default store;

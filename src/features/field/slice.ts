@@ -16,12 +16,8 @@ import {
   generateFieldMap, 
   searchElementForOpen,
   getCeilString,
-  noMinesLeft
+  isAllMinesFound
 } from './action';
-
-import store from '../store';
-import { setGameState } from '../main/slicer';
-import { GameStatus } from '../main/types';
 
 interface IGenerateMapPayload {
   size: IFieldSize,
@@ -38,7 +34,11 @@ const fieldAdapter = createEntityAdapter<IFieldCeil>({
 });
 
 const initialState: IFieldStore = fieldAdapter.getInitialState({
-  entities: <IFieldList>{}
+  entities: <IFieldList>{},
+  minesLeft: 0,
+  timer: 0,
+  allMinesFound: false,
+  isMineOpen: false,
 });
 
 const fieldSlice = createSlice({
@@ -67,10 +67,7 @@ const fieldSlice = createSlice({
         ceil.isOpen = true;
 
         if (ceil.isMine) {
-          //TODO костыль, переделать
-          setTimeout(() => {
-            store.dispatch(setGameState(GameStatus.LOOSE_SCREEN));
-          });
+          state.isMineOpen = true;
         }
 
         if (ceil.numberMinesArround === 0) {
@@ -80,14 +77,7 @@ const fieldSlice = createSlice({
             });
         }
 
-        if (noMinesLeft()) {
-          //TODO костыль, переделать
-          setTimeout(() => {
-            store.dispatch(setGameState(GameStatus.WIN_SCREEN));
-          });
-        }
-
-
+        state.allMinesFound = isAllMinesFound(state);
       },
       prepare: (element: IFieldElement, size: IFieldSize) => ({
         payload: {
@@ -97,7 +87,7 @@ const fieldSlice = createSlice({
           },
           size: size
         }
-      })
+      }),
     },
 
     flagElement: {
@@ -111,7 +101,7 @@ const fieldSlice = createSlice({
         }
       })
     }
-  }
+  },
 });
 
 export const {
