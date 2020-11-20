@@ -115,54 +115,85 @@ let maxLevel: number = 0;
 const _searchElementForOpen = (
   element: IFieldElement, 
   size: IFieldSize, 
-  entities: IFieldList, 
-  foundElementList: Array<string> = [],
-  level: number = 0
+  entities: IFieldList
 ) => {
-  if (level > maxLevel) {
-    maxLevel = level;
-  }
+  const foundElementList = [
+    getCeilString(element)
+  ];
 
-  if (level > 500) {
-    // console.log('too nested')
-    return [];
-  }
+  let iterates = 0;
 
-  let searchNestedItems: Array<IFieldElement> = [];
-
-  positionsArround.forEach((modifier) => {
-    const [y, x] = modifier;
-    const positionElement: IFieldElement = {
-      x: element.x + x,
-      y: element.y + y
-    }
-
-    if (!getCoordinateInField(positionElement, size)) {
-      return;
-    }
-    const elementId = getCeilString(positionElement);
-
-    const ceil: IFieldCeil = entities[elementId];
-    
-    
-    if (!ceil.isOpen && !ceil.isFlagged && ceil.numberMinesArround === 0 && !foundElementList.includes(elementId)) {
-      searchNestedItems.push(positionElement);
-    }
-
-    if (!ceil.isMine && !ceil.isOpen && !ceil.isFlagged) {
-      foundElementList.push(elementId);
-    }
-  });
+  let lastFoundElements = -1;
   
-  searchNestedItems.length && searchNestedItems.forEach((nestedEl) => {
-    foundElementList.concat(_searchElementForOpen(
-      nestedEl,
-      size,
-      entities,
-      foundElementList,
-      level+1,
-    ))
-  });
+  while(lastFoundElements = foundElementList.length) {
+    lastFoundElements = foundElementList.length;
+    element = getElementFromString(foundElementList[getRandomInt(0, foundElementList.length - 1)]);
+
+    positionsArround.forEach((modifier) => {
+      const [y, x] = modifier;
+      const positionElement: IFieldElement = {
+        x: element.x + x,
+        y: element.y + y
+      }
+      const elementId = getCeilString(positionElement);
+
+      if (
+        !getCoordinateInField(positionElement, size) || 
+        foundElementList.includes(elementId)
+      ) {
+        return;
+      }
+
+      const ceil: IFieldCeil = entities[elementId];
+      if (!ceil.isMine && !ceil.isOpen && !ceil.isFlagged) {
+        foundElementList.push(elementId);
+      }
+    });
+
+    iterates++;
+    // console.log(iterates);
+    if (iterates >= 50000) {
+      console.log('Complete');
+      return foundElementList;
+    }
+  }
+  
+  return foundElementList;
+
+  // let searchNestedItems: Array<IFieldElement> = [];
+
+  // positionsArround.forEach((modifier) => {
+  //   const [y, x] = modifier;
+  //   const positionElement: IFieldElement = {
+  //     x: element.x + x,
+  //     y: element.y + y
+  //   }
+
+  //   if (!getCoordinateInField(positionElement, size)) {
+  //     return;
+  //   }
+  //   const elementId = getCeilString(positionElement);
+
+  //   const ceil: IFieldCeil = entities[elementId];
+    
+  //   if (!ceil.isOpen && !ceil.isFlagged && ceil.numberMinesArround === 0 && !foundElementList.includes(elementId)) {
+  //     searchNestedItems.push(positionElement);
+  //   }
+
+  //   if (!ceil.isMine && !ceil.isOpen && !ceil.isFlagged) {
+  //     foundElementList.push(elementId);
+  //   }
+  // });
+  
+  // searchNestedItems.length && searchNestedItems.forEach((nestedEl) => {
+  //   foundElementList.concat(_searchElementForOpen(
+  //     nestedEl,
+  //     size,
+  //     entities,
+  //     foundElementList,
+  //     level+1,
+  //   ))
+  // });
   
   return foundElementList;
 }
@@ -171,7 +202,7 @@ const searchElementForOpen = (
   element: IFieldElement, 
   size: IFieldSize, 
   entities: IFieldList,
-) =>  _searchElementForOpen(element, size, entities, [], 0).map((elementNumber) => getElementFromString(elementNumber))
+) =>  _searchElementForOpen(element, size, entities).map((elementNumber) => getElementFromString(elementNumber))
 
 
 const openCeil = createAsyncThunk('field/openCeil', async (data: {
