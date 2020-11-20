@@ -6,13 +6,21 @@ export type {
   IFieldElement,
   IFieldCeil,
   IFieldSize,
+  IOpenCellPayload
+}
+
+interface IOpenCellPayload {
+  isMine: boolean,
+  targetElement: IFieldElement,
+  foundToOpen: Array<IFieldElement>
 }
 
 interface IFieldStore {
   ids: Array<EntityId>
   entities: IFieldList,
   allMinesFound: boolean,
-  isMineOpen: boolean
+  isMineOpen: boolean,
+  minesLeft: number
 }
 
 interface IFieldList {

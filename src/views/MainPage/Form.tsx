@@ -41,7 +41,7 @@ const StartForm = () => {
     }
 
     if (!errors.size.x && !errors.size.y) {
-      let minMineCount = Math.round(values.size.x * values.size.y / 6);
+      let minMineCount = Math.round(values.size.x * values.size.y / 12);
       let maxMineCount = Math.round(values.size.x * values.size.y / 2);
 
       if (!(minMineCount <= values.minesCount && values.minesCount <= maxMineCount)) {

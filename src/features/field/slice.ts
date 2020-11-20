@@ -9,70 +9,40 @@ import {
   IFieldElement, 
   IFieldList, 
   IFieldStore, 
-  IFieldSize
+  IOpenCellPayload
 } from './types';
 
 import { 
   generateMap, 
-  searchElementForOpen,
   getCeilString,
-  isAllMinesFound
+  isAllMinesFound,
+  openCeil
 } from './action';
-
-interface IOpenElementPayload {
-  element: IFieldElement,
-  size: IFieldSize,
-}
 
 const fieldAdapter = createEntityAdapter<IFieldCeil>({
   selectId: (ceil: IFieldCeil) => getCeilString(ceil)
 });
 
 const initialState: IFieldStore = fieldAdapter.getInitialState({
-  entities: <IFieldList>{},
+  entities: {} as IFieldList,
   allMinesFound: false,
   isMineOpen: false,
+  minesLeft: 0,
 });
 
 const fieldSlice = createSlice({
   name: 'field',
   initialState: initialState,
   reducers: {
-    openElement: {
-      reducer(state, action: PayloadAction<IOpenElementPayload>) {
-        const {element, size} = action.payload;
-        
-        const ceil = state.entities[getCeilString(element)];
-
-        ceil.isOpen = true;
-
-        if (ceil.isMine) {
-          state.isMineOpen = true;
-        }
-
-        if (ceil.numberMinesArround === 0) {
-          searchElementForOpen(element, size, state.entities)
-            .map((element) => {
-              state.entities[getCeilString(element)].isOpen = true;
-            });
-        }
-
-        state.allMinesFound = isAllMinesFound(state);
-      },
-      prepare: (element: IFieldElement, size: IFieldSize) => ({
-        payload: {
-          element: {
-            x: element.x,
-            y: element.y
-          },
-          size: size
-        }
-      }),
-    },
-
     flagElement: {
       reducer(state, action: PayloadAction<IFieldElement>) {
-        state.entities[getCeilString(action.payload)].isFlagged = !state.entities[getCeilString(action.payload)].isFlagged;
+        const ceil = state.entities[getCeilString(action.payload)];
+        ceil.isFlagged = !ceil.isFlagged;
+        state.minesLeft += ceil.isFlagged ? -1 : 1;
+
+        if (isAllMinesFound(state.entities)) {
+          state.allMinesFound = true;
+        }
       },
       prepare: (ceil: IFieldElement) => ({
         payload: {
@@ -87,13 +57,33 @@ const fieldSlice = createSlice({
       .addCase(generateMap.fulfilled, (state, action) => {
         state.isMineOpen = false;
         state.allMinesFound = false;
+        state.minesLeft = action.payload.filter((ceil: IFieldCeil) => ceil.isMine).length;
         fieldAdapter.setAll(state, action.payload);
+      })
+      .addCase(openCeil.fulfilled, (state, action: PayloadAction<IOpenCellPayload>) => {
+        const {targetElement, foundToOpen, isMine} = action.payload;
+
+        state.entities[getCeilString(targetElement)].isOpen = true;
+
+        if (isMine) {
+          state.isMineOpen = true;
+          return;
+        }
+
+        foundToOpen.forEach((element) => {
+          state.entities[getCeilString(element)].isOpen = true;
+        });
+
+
+        if (isAllMinesFound(state.entities)) {
+          state.allMinesFound = true;
+          return;
+        }
       })
   }
 });
 
 export const {
-  openElement,
   flagElement,
 } = fieldSlice.actions;
 export default fieldSlice.reducer;

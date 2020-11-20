@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import Field   from './Field';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { IRootStore } from '../../features/store';
-import { GameStatus } from '../../features/main/types';
-import Board from './Board';
 import { setGameState } from '../../features/main/slicer';
+import { GameStatus } from '../../features/main/types';
+import { IRootStore } from '../../features/store';
+import Board from './Board';
+import Field from './Field';
 
 const Game = () => {
   const dispatch = useDispatch();

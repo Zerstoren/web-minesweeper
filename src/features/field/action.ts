@@ -1,5 +1,5 @@
-import {IFieldElement, IFieldCeil, IFieldSize, IFieldList, IFieldStore} from './types';
 import { createAsyncThunk } from '@reduxjs/toolkit';
+import { IFieldCeil, IFieldElement, IFieldList, IFieldSize, IOpenCellPayload } from './types';
 
 const positionsArround: Array<[number, number]> = [
   // [y, x]
@@ -50,7 +50,6 @@ const getMinesArroundPosition = (element: IFieldElement, size: IFieldSize, mines
 
 const getRandomMinesPositions = (minesCount: number, size: IFieldSize) : Array<string> => {
   let minePosition: Array<string> = [];
-  let currentRandomInt: number;
 
   if (minesCount >= size.y * size.x) {
     throw new Error('To many mines, where is validation?');
@@ -95,26 +94,20 @@ const generateFieldMap = (minesCount: number, size: IFieldSize) : Array<IFieldCe
   return mapCeilList;
 }
 
-const isAllMinesFound = (store: IFieldStore) : boolean => {
+const isAllMinesFound = (entities: IFieldList) : boolean => {
   let closedItems = 0;
   let mines = 0;
-  Object.values(store.entities).forEach((ceil: IFieldCeil) => {
+  let minesFlagged = 0;
+  let flags = 0;
+
+  Object.values(entities).forEach((ceil: IFieldCeil) => {
     if (!ceil.isOpen) closedItems += 1;
     if (ceil.isMine) mines += 1;
+    if (ceil.isMine && ceil.isFlagged) minesFlagged += 1;
+    if (ceil.isFlagged) flags += 1;
   });
 
-  return mines === closedItems;
-};
-
-const searchElementForOpen = (
-  element: IFieldElement, 
-  size: IFieldSize, 
-  entities: IFieldList,
-) => {
-  let debugNested: Array<IFieldElement> = [];
-  let g = _searchElementForOpen(element, size, entities, [], 0, debugNested).map((elementNumber) => getElementFromString(elementNumber))
-  console.log(debugNested.length);
-  return g;
+  return (mines === closedItems || mines === minesFlagged) && flags <= mines;
 };
 
 let maxLevel: number = 0;
@@ -124,8 +117,7 @@ const _searchElementForOpen = (
   size: IFieldSize, 
   entities: IFieldList, 
   foundElementList: Array<string> = [],
-  level: number = 0,
-  debugNested: Array<IFieldElement>
+  level: number = 0
 ) => {
   if (level > maxLevel) {
     maxLevel = level;
@@ -155,7 +147,6 @@ const _searchElementForOpen = (
     
     if (!ceil.isOpen && !ceil.isFlagged && ceil.numberMinesArround === 0 && !foundElementList.includes(elementId)) {
       searchNestedItems.push(positionElement);
-      debugNested.push(positionElement);
     }
 
     if (!ceil.isMine && !ceil.isOpen && !ceil.isFlagged) {
@@ -163,23 +154,48 @@ const _searchElementForOpen = (
     }
   });
   
-  searchNestedItems.length && searchNestedItems.map((nestedEl) => {
+  searchNestedItems.length && searchNestedItems.forEach((nestedEl) => {
     foundElementList.concat(_searchElementForOpen(
       nestedEl,
       size,
       entities,
       foundElementList,
       level+1,
-      debugNested,
     ))
   });
   
-  if (level==0) {
-    console.log(`max level ${maxLevel}`)
-  }
   return foundElementList;
 }
 
+const searchElementForOpen = (
+  element: IFieldElement, 
+  size: IFieldSize, 
+  entities: IFieldList,
+) =>  _searchElementForOpen(element, size, entities, [], 0).map((elementNumber) => getElementFromString(elementNumber))
+
+
+const openCeil = createAsyncThunk('field/openCeil', async (data: {
+  entities: IFieldList,
+  size: IFieldSize,
+  element: IFieldElement,
+}) => {
+  const ceil = data.entities[getCeilString(data.element)];
+  const result : IOpenCellPayload = {
+    isMine: false,
+    foundToOpen: [],
+    targetElement: data.element
+  };
+
+  if (ceil.isMine) {
+    result.isMine = true;
+  };
+
+  if (ceil.numberMinesArround === 0) {
+    result.foundToOpen = searchElementForOpen(data.element, data.size, data.entities)
+  }
+
+  return result;
+});
 
 const generateMap = createAsyncThunk('field/generateMap', async (data: {minesCount: number, size: IFieldSize}) => {
   return generateFieldMap(data.minesCount, data.size);
@@ -187,7 +203,8 @@ const generateMap = createAsyncThunk('field/generateMap', async (data: {minesCou
 
 export {
   generateMap,
+  openCeil,
   getCeilString,
   searchElementForOpen,
   isAllMinesFound
-}
+};

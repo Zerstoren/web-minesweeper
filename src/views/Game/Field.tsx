@@ -2,10 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { IRootStore } from '../../features/store';
-import { openElement, flagElement} from '../../features/field/slice';
-import { getCeilString } from '../../features/field/action';
+import { flagElement} from '../../features/field/slice';
+import { getCeilString, openCeil } from '../../features/field/action';
 import { GameStatus } from '../../features/main/types';
 import { setGameState } from '../../features/main/slicer';
+import { IFieldElement } from '../../features/field/types';
 
 
 const Field = () => {
@@ -13,17 +14,21 @@ const Field = () => {
 
   const [currentPress, setCurrentPress] = useState('');
   const [gameStart, setGameStart] = useState(false);
-  const {size, gameStatus, minesCount} = useSelector((state: IRootStore) => state.main);
+  const {size, gameStatus} = useSelector((state: IRootStore) => state.main);
   const field = useSelector((state: IRootStore) => state.field);
 
   useEffect(() => {
-    if (gameStatus === GameStatus.GAME_GENERATE_MAP && gameStart === true) {
-      setGameStart(false);
+    const updateGame = () => {
+      if (gameStatus === GameStatus.GAME_GENERATE_MAP && gameStart === true) {
+        setGameStart(false);
+      }
+  
+      if (gameStatus === GameStatus.GAME_BEFORE_START && gameStart) {
+        dispath(setGameState(GameStatus.GAME_IN_PROCESS));
+      }
     }
 
-    if (gameStatus === GameStatus.GAME_BEFORE_START && gameStart) {
-      dispath(setGameState(GameStatus.GAME_IN_PROCESS));
-    }
+    updateGame();
   })
 
   const onMouseDown = (e: React.MouseEvent<HTMLDivElement & { target: HTMLDivElement }>) => {
@@ -54,10 +59,12 @@ const Field = () => {
     }
 
     const target = e.target as HTMLDivElement;
-    const ceilId = getCeilString({
+    const element: IFieldElement = {
       x: Number.parseInt(target.dataset.x as string), 
       y: Number.parseInt(target.dataset.y as string)
-    });
+    };
+    
+    const ceilId = getCeilString(element);
 
     if (ceilId !== currentPress) {
       return;
@@ -67,16 +74,14 @@ const Field = () => {
 
     if (e.button === 0) {
       setGameStart(true);
-      dispath(openElement({
-        x: Number.parseInt(target.dataset.x as string),
-        y: Number.parseInt(target.dataset.y as string)
-      }, size));
+      dispath(openCeil({
+        entities: field.entities,
+        element: element,
+        size: size
+      }));
     } else if (e.button === 2 && !ceil.isOpen) {
       setGameStart(true);
-      dispath(flagElement({
-        x: Number.parseInt(target.dataset.x as string),
-        y: Number.parseInt(target.dataset.y as string)
-      }));
+      dispath(flagElement(element));
     }
 
     setCurrentPress('');
@@ -91,14 +96,14 @@ const Field = () => {
       let isClassWhenMouseDownOnCurrentBox = getCeilString({x, y}) === currentPress || currentField.isOpen ? 'pressed' : ''; 
       let ceilContent = '';
 
-      if (currentField.isOpen) {
+      if (currentField.isFlagged) {
+        ceilContent = 'F';
+      } else if (currentField.isOpen) {
         if (currentField.isMine) {
           ceilContent = 'M';
         } else if (currentField.numberMinesArround) {
           ceilContent = currentField.numberMinesArround.toString();
         }
-      } else if (currentField.isFlagged) {
-        ceilContent = 'F';
       }
 
       axisX.push(

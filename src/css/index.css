@@ -34,16 +34,8 @@ body {
   border-right: 2px solid #fff;
 }
 
-.board-minues-neded-found {
-
-}
-
 .board-restart {
-
-}
-
-.board-timer {
-  
+  cursor: pointer;
 }
 
 .field {
@@ -58,13 +50,9 @@ body {
   -khtml-user-drag: none;
   -moz-user-drag: none;
   -o-user-drag: none;
-  user-drag: none;
   user-select: none;
 }
 
-.row {
-
-}
 
 .column {
   background-color: #eee;;
@@ -87,6 +75,29 @@ body {
   -khtml-user-drag: none;
   -moz-user-drag: none;
   -o-user-drag: none;
-  user-drag: none;
   cursor: default;
+}
+
+.popup {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 10px;
+  font-size: 18px;
+  margin: 0 auto;
+  width: 150px;
+  opacity: 0.9;
+  text-align: center;
+  border-radius: 5px;
+  box-shadow: 0 0 10px #333;
+}
+
+.popup.win {
+  background-color: greenyellow;
+}
+
+.popup.loose {
+  background-color: red;
+  color: #fff;
 }
