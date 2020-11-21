@@ -110,68 +110,60 @@ const isAllMinesFound = (entities: IFieldList) : boolean => {
   return (mines === closedItems || mines === minesFlagged) && flags <= mines;
 };
 
-let maxLevel: number = 0;
-//TODO need optimization. Too many recursion
-const _searchElementForOpen = (
-  element: IFieldElement, 
-  size: IFieldSize, 
-  entities: IFieldList, 
-  foundElementList: Array<string> = [],
-  level: number = 0
-) => {
-  if (level > maxLevel) {
-    maxLevel = level;
-  }
-
-  if (level > 500) {
-    // console.log('too nested')
-    return [];
-  }
-
-  let searchNestedItems: Array<IFieldElement> = [];
-
-  positionsArround.forEach((modifier) => {
-    const [y, x] = modifier;
-    const positionElement: IFieldElement = {
-      x: element.x + x,
-      y: element.y + y
-    }
-
-    if (!getCoordinateInField(positionElement, size)) {
-      return;
-    }
-    const elementId = getCeilString(positionElement);
-
-    const ceil: IFieldCeil = entities[elementId];
-    
-    
-    if (!ceil.isOpen && !ceil.isFlagged && ceil.numberMinesArround === 0 && !foundElementList.includes(elementId)) {
-      searchNestedItems.push(positionElement);
-    }
-
-    if (!ceil.isMine && !ceil.isOpen && !ceil.isFlagged) {
-      foundElementList.push(elementId);
-    }
-  });
-  
-  searchNestedItems.length && searchNestedItems.forEach((nestedEl) => {
-    foundElementList.concat(_searchElementForOpen(
-      nestedEl,
-      size,
-      entities,
-      foundElementList,
-      level+1,
-    ))
-  });
-  
-  return foundElementList;
-}
-
 const searchElementForOpen = (
   element: IFieldElement, 
   size: IFieldSize, 
   entities: IFieldList,
-) =>  _searchElementForOpen(element, size, entities, [], 0).map((elementNumber) => getElementFromString(elementNumber))
+) => {
+  const canOpenPoint = (x: number, y: number) => {
+    const positionElement: IFieldElement = {x, y};
+
+    if (!getCoordinateInField(positionElement, size)) {
+      return false;
+    }
+
+    const elementId = getCeilString(positionElement);
+    const ceil: IFieldCeil = entities[elementId];
+
+    if (found.includes(elementId) || stack.includes(elementId)) {
+      return false;
+    }
+
+    if (ceil.isFlagged || ceil.isMine) {
+      return false;
+    }
+    
+    return true;
+  }
+
+  let found: Array<string> = [];
+  let stack = [getCeilString(element)];
+  
+  while(stack.length !== 0) {
+    let point = getElementFromString(stack[0]);
+    found.push(stack[0])
+    let ceil = entities[stack[0]]; 
+    stack.splice(0, 1);
+
+    if (ceil.numberMinesArround) {
+      continue;
+    }
+    
+    positionsArround.forEach((modifier) => {
+      const [y, x] = modifier;
+      const newpoint: IFieldElement = {
+        x: point.x + x,
+        y: point.y + y
+      };
+
+      if (canOpenPoint(newpoint.x, newpoint.y)) {
+        stack.push(getCeilString(newpoint));
+      }
+    });
+  }
+
+  return found.map((elementStr) => getElementFromString(elementStr));
+}
 
 
 const openCeil = createAsyncThunk('field/openCeil', async (data: {
