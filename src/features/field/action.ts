@@ -110,58 +110,98 @@ const isAllMinesFound = (entities: IFieldList) : boolean => {
   return (mines === closedItems || mines === minesFlagged) && flags <= mines;
 };
 
-let maxLevel: number = 0;
 //TODO need optimization. Too many recursion
 const _searchElementForOpen = (
   element: IFieldElement, 
   size: IFieldSize, 
-  entities: IFieldList
+  entities: IFieldList,
+  found: Array<string>
 ) => {
-  const foundElementList = [
-    getCeilString(element)
-  ];
+  const canOpenPoint = (x: number, y: number) => {
+    const positionElement: IFieldElement = {x, y};
 
-  let iterates = 0;
+    if (!getCoordinateInField(positionElement, size)) {
+      return 'f';
+    }
 
-  let lastFoundElements = -1;
-  
-  while(lastFoundElements = foundElementList.length) {
-    lastFoundElements = foundElementList.length;
-    element = getElementFromString(foundElementList[getRandomInt(0, foundElementList.length - 1)]);
+    const elementId = getCeilString(positionElement);
+    const ceil: IFieldCeil = entities[elementId];
 
-    positionsArround.forEach((modifier) => {
-      const [y, x] = modifier;
-      const positionElement: IFieldElement = {
-        x: element.x + x,
-        y: element.y + y
+    if (found.includes(elementId)) {
+      return 'f';
+    }
+
+    if (ceil.isFlagged || ceil.isMine) {
+      return 'f';
+    }
+
+    if (ceil.numberMinesArround) {
+      return 'l';
+    }
+
+    return 'o'
+  }
+
+  let spanLeft: number;
+  let spanRight: number;
+
+  let stack = [getCeilString(element)];
+  let i = 0;
+
+  while(stack.length != 0) {
+    i++;
+    let point = getElementFromString(stack[0]);
+    stack.splice(0, 1);
+
+    let y1 = point.y;
+    let newpoint = {x: 0, y: 0};
+    spanLeft = 0;
+    spanRight = 0;
+
+    while(y1 > 0) {
+      let g = canOpenPoint(point.x, y1);
+      if (g === 'o') {
+        y1 = y1 - 1;
+      } else if (g === 'l') {
+        // y1 = y1 - 1;
+        break;
+      } else {
+        break;
       }
-      const elementId = getCeilString(positionElement);
+    }
 
-      if (
-        !getCoordinateInField(positionElement, size) || 
-        foundElementList.includes(elementId)
-      ) {
-        return;
+    while(y1 < size.y) {
+      let b = canOpenPoint(point.x, y1);
+      if (b === 'f') {break;}
+      
+      found.push(getCeilString({x: point.x, y: y1}));
+      let cl = entities[getCeilString({x: point.x, y: y1})];
+      if (cl.numberMinesArround) {
+        y1 = y1 + 1;
+        continue;
       }
 
-      const ceil: IFieldCeil = entities[elementId];
-      if (!ceil.isMine && !ceil.isOpen && !ceil.isFlagged) {
-        foundElementList.push(elementId);
+      if (spanLeft == 0 && point.x > 0 && canOpenPoint(point.x-1,y1) != 'f') {
+        newpoint.x = point.x-1; 
+        newpoint.y = y1; 
+        stack.push(getCeilString(newpoint));
+        spanLeft = 1;
+      } else if (spanLeft == 1 && point.x > 0 && canOpenPoint(point.x-1,y1) == 'f') {
+          spanLeft = 0;
       }
-    });
+      
+      if (spanRight == 0 && point.x < size.x && canOpenPoint(point.x+1,y1) != 'f') {
+        newpoint.x = point.x+1; 
+        newpoint.y = y1; 
+        stack.push(getCeilString(newpoint));
+        spanRight = 1;
+      } else if (spanRight == 1 && point.x < size.x && canOpenPoint(point.x+1,y1) == 'f') {
+        spanRight = 0;
+      }
 
-    iterates++;
-    // console.log(iterates);
-    if (iterates >= 50000) {
-      console.log('Complete');
-      return foundElementList;
+      y1 = y1 + 1;
     }
   }
-  
-  return foundElementList;
-
-  // let searchNestedItems: Array<IFieldElement> = [];
-
   // positionsArround.forEach((modifier) => {
   //   const [y, x] = modifier;
   //   const positionElement: IFieldElement = {
@@ -194,15 +234,17 @@ const _searchElementForOpen = (
   //     level+1,
   //   ))
   // });
-  
-  return foundElementList;
 }
 
 const searchElementForOpen = (
   element: IFieldElement, 
   size: IFieldSize, 
   entities: IFieldList,
-) =>  _searchElementForOpen(element, size, entities).map((elementNumber) => getElementFromString(elementNumber))
+) => {
+  let fills: Array<string> = [];
+   _searchElementForOpen(element, size, entities, fills)//.map((elementNumber) => getElementFromString(elementNumber))
+   return fills.map((elementStr) => getElementFromString(elementStr))
+}
 
 
 const openCeil = createAsyncThunk('field/openCeil', async (data: {
