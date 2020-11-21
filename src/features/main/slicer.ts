@@ -16,8 +16,8 @@ interface ISetFieldPayload {
 }
 
 const initialState: IMainStore = {
-  minesCount: 90,
-  size: {x: 30, y: 30},
+  minesCount: 9,
+  size: {x: 10, y: 10},
   gameStatus: GameStatus.MAIN_SCREEN
 };
 

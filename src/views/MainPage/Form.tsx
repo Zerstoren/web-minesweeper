@@ -32,22 +32,22 @@ const StartForm = () => {
       size: {}
     };
 
-    // if (!(3 <= values.size.x && values.size.x <= 30)) {
-    //   errors.size.x = 'Generate map directly from 3 to 30 column';
-    // }
+    if (!(3 <= values.size.x && values.size.x <= 30)) {
+      errors.size.x = 'Generate map directly from 3 to 30 column';
+    }
 
-    // if (!(3 <= values.size.y && values.size.y <= 30)) {
-    //   errors.size.y = 'Generate map directly from 3 to 30 rows';
-    // }
+    if (!(3 <= values.size.y && values.size.y <= 30)) {
+      errors.size.y = 'Generate map directly from 3 to 30 rows';
+    }
 
-    // if (!errors.size.x && !errors.size.y) {
-    //   let minMineCount = Math.round(values.size.x * values.size.y / 12);
-    //   let maxMineCount = Math.round(values.size.x * values.size.y / 2);
+    if (!errors.size.x && !errors.size.y) {
+      let minMineCount = Math.round(values.size.x * values.size.y / 12);
+      let maxMineCount = Math.round(values.size.x * values.size.y / 2);
 
-    //   if (!(minMineCount <= values.minesCount && values.minesCount <= maxMineCount)) {
-    //     errors.minesCount = `Set mines count in range from ${minMineCount} to ${maxMineCount}`
-    //   }
-    // }
+      if (!(minMineCount <= values.minesCount && values.minesCount <= maxMineCount)) {
+        errors.minesCount = `Set mines count in range from ${minMineCount} to ${maxMineCount}`
+      }
+    }
 
     return errors;
   }
