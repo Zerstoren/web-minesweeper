@@ -110,140 +110,59 @@ const isAllMinesFound = (entities: IFieldList) : boolean => {
   return (mines === closedItems || mines === minesFlagged) && flags <= mines;
 };
 
-//TODO need optimization. Too many recursion
-const _searchElementForOpen = (
-  element: IFieldElement, 
-  size: IFieldSize, 
-  entities: IFieldList,
-  found: Array<string>
-) => {
-  const canOpenPoint = (x: number, y: number) => {
-    const positionElement: IFieldElement = {x, y};
-
-    if (!getCoordinateInField(positionElement, size)) {
-      return 'f';
-    }
-
-    const elementId = getCeilString(positionElement);
-    const ceil: IFieldCeil = entities[elementId];
-
-    if (found.includes(elementId)) {
-      return 'f';
-    }
-
-    if (ceil.isFlagged || ceil.isMine) {
-      return 'f';
-    }
-
-    if (ceil.numberMinesArround) {
-      return 'l';
-    }
-
-    return 'o'
-  }
-
-  let spanLeft: number;
-  let spanRight: number;
-
-  let stack = [getCeilString(element)];
-  let i = 0;
-
-  while(stack.length != 0) {
-    i++;
-    let point = getElementFromString(stack[0]);
-    stack.splice(0, 1);
-
-    let y1 = point.y;
-    let newpoint = {x: 0, y: 0};
-    spanLeft = 0;
-    spanRight = 0;
-
-    while(y1 > 0) {
-      let g = canOpenPoint(point.x, y1);
-      if (g === 'o') {
-        y1 = y1 - 1;
-      } else if (g === 'l') {
-        // y1 = y1 - 1;
-        break;
-      } else {
-        break;
-      }
-    }
-
-    while(y1 < size.y) {
-      let b = canOpenPoint(point.x, y1);
-      if (b === 'f') {break;}
-      
-      found.push(getCeilString({x: point.x, y: y1}));
-      let cl = entities[getCeilString({x: point.x, y: y1})];
-      if (cl.numberMinesArround) {
-        y1 = y1 + 1;
-        continue;
-      }
-
-      if (spanLeft == 0 && point.x > 0 && canOpenPoint(point.x-1,y1) != 'f') {
-        newpoint.x = point.x-1; 
-        newpoint.y = y1; 
-        stack.push(getCeilString(newpoint));
-        spanLeft = 1;
-      } else if (spanLeft == 1 && point.x > 0 && canOpenPoint(point.x-1,y1) == 'f') {
-          spanLeft = 0;
-      }
-      
-      if (spanRight == 0 && point.x < size.x && canOpenPoint(point.x+1,y1) != 'f') {
-        newpoint.x = point.x+1; 
-        newpoint.y = y1; 
-        stack.push(getCeilString(newpoint));
-        spanRight = 1;
-      } else if (spanRight == 1 && point.x < size.x && canOpenPoint(point.x+1,y1) == 'f') {
-        spanRight = 0;
-      }
-
-      y1 = y1 + 1;
-    }
-  }
-  // positionsArround.forEach((modifier) => {
-  //   const [y, x] = modifier;
-  //   const positionElement: IFieldElement = {
-  //     x: element.x + x,
-  //     y: element.y + y
-  //   }
-
-  //   if (!getCoordinateInField(positionElement, size)) {
-  //     return;
-  //   }
-  //   const elementId = getCeilString(positionElement);
-
-  //   const ceil: IFieldCeil = entities[elementId];
-    
-  //   if (!ceil.isOpen && !ceil.isFlagged && ceil.numberMinesArround === 0 && !foundElementList.includes(elementId)) {
-  //     searchNestedItems.push(positionElement);
-  //   }
-
-  //   if (!ceil.isMine && !ceil.isOpen && !ceil.isFlagged) {
-  //     foundElementList.push(elementId);
-  //   }
-  // });
-  
-  // searchNestedItems.length && searchNestedItems.forEach((nestedEl) => {
-  //   foundElementList.concat(_searchElementForOpen(
-  //     nestedEl,
-  //     size,
-  //     entities,
-  //     foundElementList,
-  //     level+1,
-  //   ))
-  // });
-}
-
 const searchElementForOpen = (
   element: IFieldElement, 
   size: IFieldSize, 
   entities: IFieldList,
 ) => {
-  let fills: Array<string> = [];
-   _searchElementForOpen(element, size, entities, fills)//.map((elementNumber) => getElementFromString(elementNumber))
-   return fills.map((elementStr) => getElementFromString(elementStr))
+  const canOpenPoint = (x: number, y: number) => {
+    const positionElement: IFieldElement = {x, y};
+
+    if (!getCoordinateInField(positionElement, size)) {
+      return false;
+    }
+
+    const elementId = getCeilString(positionElement);
+    const ceil: IFieldCeil = entities[elementId];
+
+    if (found.includes(elementId) || stack.includes(elementId)) {
+      return false;
+    }
+
+    if (ceil.isFlagged || ceil.isMine) {
+      return false;
+    }
+    
+    return true;
+  }
+
+  let found: Array<string> = [];
+  let stack = [getCeilString(element)];
+  
+  while(stack.length !== 0) {
+    let point = getElementFromString(stack[0]);
+    found.push(stack[0])
+    let ceil = entities[stack[0]]; 
+    stack.splice(0, 1);
+
+    if (ceil.numberMinesArround) {
+      continue;
+    }
+    
+    positionsArround.forEach((modifier) => {
+      const [y, x] = modifier;
+      const newpoint: IFieldElement = {
+        x: point.x + x,
+        y: point.y + y
+      };
+
+      if (canOpenPoint(newpoint.x, newpoint.y)) {
+        stack.push(getCeilString(newpoint));
+      }
+    });
+  }
+
+  return found.map((elementStr) => getElementFromString(elementStr));
 }
 
 

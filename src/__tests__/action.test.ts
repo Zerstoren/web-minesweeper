@@ -7,6 +7,6 @@ test('search recursive open', () => {
   let r = searchElementForOpen({x: 0, y: 0}, {x: 80, y: 80}, entities());
   console.timeEnd('start search');
 
-  expect(r.length).toEqual(80*80-9);
+  expect(r.length).toEqual(80*80-1);
   expect(4).toEqual(4);
 });
