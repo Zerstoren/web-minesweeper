@@ -6,7 +6,7 @@ const MainPage = () => {
 
   return (
     <React.Fragment>
-      <h2>Mine swipeer</h2>
+      <h2>Mine sweeper</h2>
       <StartForm />
     </React.Fragment>
   )

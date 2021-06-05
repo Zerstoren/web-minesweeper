@@ -11,9 +11,8 @@ body {
   /* width: 400px; */
   min-height: 400px;
   background-color: #EEE;
-  margin: auto auto;
   padding: 10px 10px 0 10px;
-  margin-top: 30px;
+  margin: 30px auto auto;
 }
 
 .main-page .number-input {
@@ -47,9 +46,6 @@ body {
   border-right: 2px solid #fff;
 
   -webkit-user-drag: none;
-  -khtml-user-drag: none;
-  -moz-user-drag: none;
-  -o-user-drag: none;
   user-select: none;
 }
 
@@ -72,9 +68,6 @@ body {
   border-right: none;
 
   -webkit-user-drag: none;
-  -khtml-user-drag: none;
-  -moz-user-drag: none;
-  -o-user-drag: none;
   cursor: default;
 }
 

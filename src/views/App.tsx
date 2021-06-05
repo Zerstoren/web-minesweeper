@@ -4,30 +4,28 @@ import { useSelector, useDispatch } from 'react-redux';
 import { IRootStore } from '../features/store';
 import { GameStatus } from '../features/main/types';
 
-import MainPage from './MainPage';
-import Game from './Game';
+import MainPage from './MainPage/MainPage';
+import Game from './Game/Game';
 
 import { generateMap } from '../features/field/action';
 import { setGameState } from '../features/main/slicer';
 
 
 const App = () => {
-  const dispath = useDispatch();
+  const dispatch = useDispatch();
   const {gameStatus, size, minesCount} = useSelector((state: IRootStore) => state.main);
 
   useEffect(() => {
-    const asyncAction = async () => {
+    (async () => {
       if (gameStatus === GameStatus.GAME_GENERATE_MAP) {
-        await dispath(generateMap({
+        await dispatch(generateMap({
           minesCount,
           size
         }));
 
-        dispath(setGameState(GameStatus.GAME_BEFORE_START));
+        dispatch(setGameState(GameStatus.GAME_BEFORE_START));
       }
-    }
-
-    asyncAction();
+    })();
   });
 
   switch(gameStatus) {

@@ -57,7 +57,7 @@ const StartForm = () => {
       onSubmit={onSubmit}
       initialValues={storageValues}
       validate={validateForm}
-      render={({handleSubmit, form, submitting, pristine, values}) => (
+      render={({handleSubmit, submitting}) => (
         <form onSubmit={handleSubmit}>
           <div className="main-page container">
             <div className="d-flex">

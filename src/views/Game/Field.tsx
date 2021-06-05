@@ -10,7 +10,7 @@ import { IFieldElement } from '../../features/field/types';
 
 
 const Field = () => {
-  const dispath = useDispatch();
+  const dispatch = useDispatch();
 
   const [currentPress, setCurrentPress] = useState('');
   const [gameStart, setGameStart] = useState(false);
@@ -18,18 +18,17 @@ const Field = () => {
   const field = useSelector((state: IRootStore) => state.field);
 
   useEffect(() => {
-    const updateGame = () => {
-      if (gameStatus === GameStatus.GAME_GENERATE_MAP && gameStart === true) {
-        setGameStart(false);
-      }
-  
-      if (gameStatus === GameStatus.GAME_BEFORE_START && gameStart) {
-        dispath(setGameState(GameStatus.GAME_IN_PROCESS));
-      }
+    if (!gameStart) {
+      return;
     }
 
-    updateGame();
-  })
+    if (gameStatus === GameStatus.GAME_GENERATE_MAP) {
+      setGameStart(false);
+    } else if (gameStatus === GameStatus.GAME_BEFORE_START) {
+      dispatch(setGameState(GameStatus.GAME_IN_PROCESS));
+    }
+
+  }, [gameStatus, gameStart])
 
   const onMouseDown = (e: React.MouseEvent<HTMLDivElement & { target: HTMLDivElement }>) => {
     if (gameStatus !== GameStatus.GAME_IN_PROCESS && gameStatus !== GameStatus.GAME_BEFORE_START) {
@@ -74,14 +73,14 @@ const Field = () => {
 
     if (e.button === 0) {
       setGameStart(true);
-      dispath(openCeil({
+      dispatch(openCeil({
         entities: field.entities,
         element: element,
         size: size
       }));
     } else if (e.button === 2 && !ceil.isOpen) {
       setGameStart(true);
-      dispath(flagElement(element));
+      dispatch(flagElement(element));
     }
 
     setCurrentPress('');
@@ -101,8 +100,8 @@ const Field = () => {
       } else if (currentField.isOpen) {
         if (currentField.isMine) {
           ceilContent = 'M';
-        } else if (currentField.numberMinesArround) {
-          ceilContent = currentField.numberMinesArround.toString();
+        } else if (currentField.numberMinesAround) {
+          ceilContent = currentField.numberMinesAround.toString();
         }
       }
 
@@ -132,7 +131,10 @@ const Field = () => {
   } 
 
   return (
-    <div className="field" draggable="false" onContextMenu={(e) => {e.preventDefault(); return false;}}>
+    <div className="field" draggable="false" onContextMenu={(e) => {
+      e.preventDefault();
+      return false;
+    }}>
       {axisY}
     </div>
   );

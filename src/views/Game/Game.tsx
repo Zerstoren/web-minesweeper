@@ -17,7 +17,7 @@ const Game = () => {
     } else if (allMinesFound) {
       dispatch(setGameState(GameStatus.WIN_SCREEN));
     }
-  });
+  }, [isMineOpen, allMinesFound]);
 
   let popupContent;
   if (gameStatus === GameStatus.LOOSE_SCREEN) {

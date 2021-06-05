@@ -1,7 +1,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { IFieldCeil, IFieldElement, IFieldList, IFieldSize, IOpenCellPayload } from './types';
 
-const positionsArround: Array<[number, number]> = [
+const positionsAround: Array<[number, number]> = [
   // [y, x]
   [-1, -1], [-1,  0], [-1,  1],
   [ 0, -1],           [ 0,  1],
@@ -27,9 +27,9 @@ const getCoordinateInField = (element: IFieldElement, size: IFieldSize) : boolea
   (0 <= element.x && element.x <= size.x - 1) && (0 <= element.y && element.y <= size.y - 1)
 
 
-const getMinesArroundPosition = (element: IFieldElement, size: IFieldSize, mines: Array<string>) : number => {
-  let minesArround = 0;
-  positionsArround.forEach((modifier) => {
+const getMinesAroundPosition = (element: IFieldElement, size: IFieldSize, mines: Array<string>) : number => {
+  let minesAround = 0;
+  positionsAround.forEach((modifier) => {
     const [y, x] = modifier;
     const positionElement: IFieldElement = {
       x: element.x + x,
@@ -41,11 +41,11 @@ const getMinesArroundPosition = (element: IFieldElement, size: IFieldSize, mines
     }
 
     if (mines.includes(getCeilString(positionElement))) {
-      minesArround += 1;
+      minesAround += 1;
     }
   });
 
-  return minesArround;
+  return minesAround;
 }
 
 const getRandomMinesPositions = (minesCount: number, size: IFieldSize) : Array<string> => {
@@ -84,7 +84,7 @@ const generateFieldMap = (minesCount: number, size: IFieldSize) : Array<IFieldCe
         isMine: mines.includes(numberPosition),
         isOpen: false,
         isFlagged: false,
-        numberMinesArround: getMinesArroundPosition({x, y}, size, mines),
+        numberMinesAround: getMinesAroundPosition({x, y}, size, mines),
       }
 
       mapCeilList.push(ceil);
@@ -129,11 +129,7 @@ const searchElementForOpen = (
       return false;
     }
 
-    if (ceil.isFlagged || ceil.isMine) {
-      return false;
-    }
-    
-    return true;
+    return !(ceil.isFlagged || ceil.isMine);
   }
 
   let found: Array<string> = [];
@@ -145,19 +141,19 @@ const searchElementForOpen = (
     let ceil = entities[stack[0]]; 
     stack.splice(0, 1);
 
-    if (ceil.numberMinesArround) {
+    if (ceil.numberMinesAround) {
       continue;
     }
     
-    positionsArround.forEach((modifier) => {
+    positionsAround.forEach((modifier) => {
       const [y, x] = modifier;
-      const newpoint: IFieldElement = {
+      const newPoint: IFieldElement = {
         x: point.x + x,
         y: point.y + y
       };
 
-      if (canOpenPoint(newpoint.x, newpoint.y)) {
-        stack.push(getCeilString(newpoint));
+      if (canOpenPoint(newPoint.x, newPoint.y)) {
+        stack.push(getCeilString(newPoint));
       }
     });
   }
@@ -180,9 +176,9 @@ const openCeil = createAsyncThunk('field/openCeil', async (data: {
 
   if (ceil.isMine) {
     result.isMine = true;
-  };
+  }
 
-  if (ceil.numberMinesArround === 0) {
+  if (ceil.numberMinesAround === 0) {
     result.foundToOpen = searchElementForOpen(data.element, data.size, data.entities)
   }
 

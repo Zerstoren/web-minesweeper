@@ -7,7 +7,7 @@ import { useInterval } from '../../helpers/useInterval';
 
 const Board = () => {
   const dispatch = useDispatch();
-  const {gameStatus} = useSelector((store: IRootStore) => store.main);
+  const gameStatus = useSelector((store: IRootStore) => store.main.gameStatus);
   const minesLeft = useSelector((store: IRootStore) => store.field.minesLeft);
   const [gameTimer, setGameTimer] = useState(0);
 
@@ -26,7 +26,7 @@ const Board = () => {
 
   return (
     <div className="board-score d-flex justify-content-between">
-      <div className="board-minues-neded-found">{minesLeft}</div>
+      <div className="board-mines-needed-found">{minesLeft}</div>
       <div className="board-restart" onClick={gameReset}>Smile</div>
       <div className="board-timer" onClick={() => setGameTimer(gameTimer + 1)}>{gameTimer}</div>
     </div>

@@ -49,4 +49,5 @@ export const {
   setGameState,
   setStartOptions,
 } = mainSlicer.actions;
+
 export default mainSlicer.reducer;
